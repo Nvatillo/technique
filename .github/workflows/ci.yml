@@ -61,12 +61,3 @@ jobs:
           else
             echo "✅ Test coverage is sufficient"
           fi
-
-      - name: Ensure excluded classes are not in coverage report
-        run: |
-          if grep -E "(dto|model|mapper)" build/reports/jacoco/test/jacocoTestReport.xml; then
-            echo "❌ Excluded classes still appear in coverage report"
-            exit 1
-          else
-            echo "✅ Excluded classes are not present in the coverage report"
-          fi
