@@ -6,14 +6,18 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class TokenValidationServiceTest {
 
     private TokenValidationService tokenService;
-    private final String secret = "12345678901234567890123456789012"; // 32 chars para HS256
-    private final long expirationMs = 1000 * 60 * 10; // 10 minutos
+    private final String secret = "12345678901234567890123456789012";
+    private final long expirationMs = 1000 * 60 * 10;
 
     @BeforeEach
     void setUp() {
@@ -60,5 +64,38 @@ public class TokenValidationServiceTest {
 
         boolean valid = shortExpiryService.validateJwtToken(token);
         assertFalse(valid);
+    }
+
+    @Test
+    void clearToken_ValidBearerToken_ReturnsTokenWithoutPrefix() {
+        String token = "Bearer abcdef12345";
+        String result = tokenService.clearToken(token);
+        assertEquals("abcdef12345", result);
+    }
+
+    @Test
+    void clearToken_NullToken_ReturnsNull() {
+        String result = tokenService.clearToken(null);
+        assertNull(result);
+    }
+
+    @Test
+    void clearToken_EmptyToken_ReturnsNull() {
+        String result = tokenService.clearToken("");
+        assertNull(result);
+    }
+
+    @Test
+    void clearToken_TokenWithoutBearerPrefix_ReturnsNull() {
+        String token = "Token abcdef12345";
+        String result = tokenService.clearToken(token);
+        assertNull(result);
+    }
+
+    @Test
+    void clearToken_TokenWithOnlyBearerPrefix_ReturnsEmptyString() {
+        String token = "Bearer ";
+        String result = tokenService.clearToken(token);
+        assertEquals("", result);
     }
 }

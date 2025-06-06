@@ -21,7 +21,27 @@ Este proyecto es un microservicio desarrollado en **Java 11**, utilizando **Spri
 
 **Descripción**: Crea un nuevo usuario.
 
-### Request
+### Curl 
+```bash
+curl --location 'http://localhost:8080/users/sign-up' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: JSESSIONID=F1ED759A2507B977AEC4D0A95F3E7A19' \
+--data-raw '{
+  "name": "Julio Gonzalez",
+  "email": "julio@testssw.cl",
+  "password": "a2asfGfdfdf4",
+  "phones": [
+    {
+      "number": 87650009,
+      "citycode": 7,
+      "contrycode": "25"
+    }
+  ]
+}'
+```
+
+### Request Body
+
 ```json
 {
   "name": "Julio Gonzalez",
@@ -86,11 +106,42 @@ Este proyecto es un microservicio desarrollado en **Java 11**, utilizando **Spri
 }
 ``` 
 
+``` json
+{
+    "error": [
+        {
+            "timestamp": "2025-06-06T16:16:11.054161200Z",
+            "codigo": 400,
+            "detail": "email cannot be empty"
+        }
+    ]
+}
+``` 
+
+``` json
+{
+    "error": [
+        {
+            "timestamp": "2025-06-06T16:17:19.696428100Z",
+            "codigo": 400,
+            "detail": "password cannot be empty"
+        }
+    ]
+}
+``` 
 
 ### 🔓 GET /login/{id}
 #### Descripción: Consulta los datos del usuario autenticado con su JWT.
 
-### Authorization: Bearer {jwt_token}
+### Curl 
+
+```bash
+curl --location 'http://localhost:8080/users/login' \
+--header 'Authorization: Bearer {TOKEN}'  \
+--header 'Cookie: JSESSIONID=F1ED759A2507B977AEC4D0A95F3E7A19'
+```
+
+### Authorization: Bearer {jwt_token} response
 
 ``` json
 {

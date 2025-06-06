@@ -24,7 +24,8 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -96,12 +97,12 @@ class UserExceptionHandlingTest {
 
     @Test
     void testUserNotFoundException() throws Exception {
-        UUID fakeId = UUID.randomUUID();
+        String fakeId = "Bearer validtoken";
         Mockito.when(userService.login(fakeId))
                 .thenThrow(new UserNotFoundException("User not found"));
 
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/users/login/" + fakeId)
-                        .header("Authorization", "Bearer validtoken"))
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/users/login")
+                        .header("Authorization", fakeId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error[0].codigo").value(404))
                 .andExpect(jsonPath("$.error[0].detail").value("User not found"));

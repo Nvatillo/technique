@@ -22,7 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -111,21 +112,21 @@ public class UserServiceTest {
 
     @Test
     void getUser_UserExists_ReturnsUser() {
-        UUID userId = UUID.randomUUID();
-        user.setId(userId);
+        String token = "Bearer Token";
+        when(tokenValidationService.clearToken(token)).thenReturn("Token");
+        when(userRepository.findByToken("Token")).thenReturn(Optional.of(user));
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        UserResponseDto result = userService.login(userId);
+        UserResponseDto result = userService.login(token);
 
         assertEquals(user.getEmail(), result.getEmail());
     }
 
     @Test
     void getUser_UserNotFound_ThrowsException() {
-        UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        String token = "Bearer Token";
+        when(tokenValidationService.clearToken(token)).thenReturn("Token");
+        when(userRepository.findByToken("Token")).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> userService.login(userId));
+        assertThrows(UserNotFoundException.class, () -> userService.login(token));
     }
 }

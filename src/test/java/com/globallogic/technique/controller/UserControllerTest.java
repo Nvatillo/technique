@@ -103,9 +103,9 @@ class UserControllerTest {
         String token = "Bearer validtoken";
 
         when(tokenValidationService.validateJwtToken("validtoken")).thenReturn(true);
-        when(userService.login(userId)).thenReturn(userResponseDto);
+        when(userService.login(token)).thenReturn(userResponseDto);
 
-        mockMvc.perform(get("/users/login/{id}", userId)
+        mockMvc.perform(get("/users/login/")
                         .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId.toString()));

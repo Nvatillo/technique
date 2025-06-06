@@ -1,7 +1,10 @@
 package com.globallogic.technique.service;
 
 import com.globallogic.technique.model.User;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -51,5 +54,12 @@ public class TokenValidationService {
                 .getBody();
 
         return claims.getSubject();
+    }
+
+    public String clearToken(String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            return token.substring(7);
+        }
+        return null;
     }
 }

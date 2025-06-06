@@ -2,8 +2,8 @@ package com.globallogic.technique.util;
 
 
 import com.globallogic.technique.dto.response.PhoneResponseDto;
-import com.globallogic.technique.dto.response.UserSigUpResponseDto;
 import com.globallogic.technique.dto.response.UserResponseDto;
+import com.globallogic.technique.dto.response.UserSigUpResponseDto;
 import com.globallogic.technique.model.Phone;
 import com.globallogic.technique.model.User;
 

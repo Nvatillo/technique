@@ -2,8 +2,8 @@ package com.globallogic.technique.service;
 
 
 import com.globallogic.technique.dto.request.UserDTO;
-import com.globallogic.technique.dto.response.UserSigUpResponseDto;
 import com.globallogic.technique.dto.response.UserResponseDto;
+import com.globallogic.technique.dto.response.UserSigUpResponseDto;
 import com.globallogic.technique.exception.user.InvalidEmailFormatException;
 import com.globallogic.technique.exception.user.InvalidPasswordFormatException;
 import com.globallogic.technique.exception.user.UserAlreadyExistsException;
@@ -16,9 +16,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-import static com.globallogic.technique.util.UserValidation.*;
+import static com.globallogic.technique.util.UserValidation.convertToLoginResponseDTO;
+import static com.globallogic.technique.util.UserValidation.convertToSignUpResponseDTO;
+import static com.globallogic.technique.util.UserValidation.isValidEmail;
+import static com.globallogic.technique.util.UserValidation.isValidPassword;
 
 
 @Service
@@ -47,8 +49,9 @@ public class UserService {
         return convertToSignUpResponseDTO(user);
     }
 
-    public UserResponseDto login(UUID id) {
-        User user = userRepository.findById(id)
+    public UserResponseDto login(String token) {
+        String searchToken = tokenValidationService.clearToken(token);
+        User user = userRepository.findByToken(searchToken)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         String newToken = generateUserToken(user);
@@ -87,5 +90,6 @@ public class UserService {
     private String generateUserToken(User user) {
         return tokenValidationService.generateJwtToken(user);
     }
+
 
 }
