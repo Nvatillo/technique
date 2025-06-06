@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -25,77 +26,75 @@ public class TokenValidationServiceTest {
     }
 
     @Test
-    void generateAndValidateToken_success() {
+    void generateJwtToken_And_ValidateToken_Success() {
+        UUID id = UUID.randomUUID();
         User user = User.builder()
-                .id(UUID.randomUUID())
+                .id(id)
                 .email("test@example.com")
                 .password("Password12")
-                .name("Test User").build();
+                .name("Test User")
+                .build();
 
         String token = tokenService.generateJwtToken(user);
         assertNotNull(token);
 
-        boolean valid = tokenService.validateJwtToken(token);
-        assertTrue(valid);
+        assertTrue(tokenService.validateJwtToken(token));
 
-        String email = tokenService.getEmailFromToken(token);
-        assertEquals("test@example.com", email);
+        String extractedId = tokenService.getUserId("Bearer " + token);
+        assertEquals(id.toString(), extractedId);
     }
 
     @Test
-    void validateToken_invalidToken() {
-        String invalidToken = "token-invalido";
-
-        boolean valid = tokenService.validateJwtToken(invalidToken);
-        assertFalse(valid);
+    void validateJwtToken_WithInvalidToken_ReturnsFalse() {
+        String invalidToken = "invalid.token.value";
+        assertFalse(tokenService.validateJwtToken(invalidToken));
     }
 
     @Test
-    void validateToken_expiredToken() throws InterruptedException {
-        TokenValidationService shortExpiryService = new TokenValidationService(secret, 100);
+    void validateJwtToken_WithExpiredToken_ReturnsFalse() throws InterruptedException {
+        TokenValidationService shortLivedService = new TokenValidationService(secret, 100); // 100 ms
 
         User user = new User();
+        user.setId(UUID.randomUUID());
         user.setEmail("expire@example.com");
 
-        String token = shortExpiryService.generateJwtToken(user);
+        String token = shortLivedService.generateJwtToken(user);
         assertNotNull(token);
 
-        Thread.sleep(200);
+        Thread.sleep(200); // Wait for expiration
 
-        boolean valid = shortExpiryService.validateJwtToken(token);
-        assertFalse(valid);
+        assertFalse(shortLivedService.validateJwtToken(token));
     }
 
     @Test
-    void clearToken_ValidBearerToken_ReturnsTokenWithoutPrefix() {
-        String token = "Bearer abcdef12345";
-        String result = tokenService.clearToken(token);
-        assertEquals("abcdef12345", result);
+    void getUserId_WithValidBearerToken_ReturnsCorrectUserId() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .email("user@example.com")
+                .build();
+
+        String jwt = tokenService.generateJwtToken(user);
+        String bearerToken = "Bearer " + jwt;
+
+        String extractedUserId = tokenService.getUserId(bearerToken);
+        assertEquals(userId.toString(), extractedUserId);
     }
 
     @Test
-    void clearToken_NullToken_ReturnsNull() {
-        String result = tokenService.clearToken(null);
-        assertNull(result);
+    void getUserId_WithInvalidToken_ThrowsException() {
+        String malformedToken = "Bearer invalid.token";
+        assertThrows(IllegalArgumentException.class, () -> tokenService.getUserId(malformedToken));
     }
 
     @Test
-    void clearToken_EmptyToken_ReturnsNull() {
-        String result = tokenService.clearToken("");
-        assertNull(result);
+    void getUserId_WithNoBearerPrefix_ThrowsException() {
+        String token = "invalidPrefixToken";
+        assertThrows(IllegalArgumentException.class, () -> tokenService.getUserId(token));
     }
 
     @Test
-    void clearToken_TokenWithoutBearerPrefix_ReturnsNull() {
-        String token = "Token abcdef12345";
-        String result = tokenService.clearToken(token);
-        assertNull(result);
-    }
-
-    @Test
-    void clearToken_TokenWithOnlyBearerPrefix_ReturnsEmptyString() {
-        String token = "Bearer ";
-        String result = tokenService.clearToken(token);
-        assertEquals("", result);
+    void getUserId_WithNullToken_ThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> tokenService.getUserId(null));
     }
 }

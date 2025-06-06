@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -111,22 +112,27 @@ public class UserServiceTest {
     }
 
     @Test
-    void getUser_UserExists_ReturnsUser() {
-        String token = "Bearer Token";
-        when(tokenValidationService.clearToken(token)).thenReturn("Token");
-        when(userRepository.findByToken("Token")).thenReturn(Optional.of(user));
+    void login_UserExists_ReturnsUserResponseDto() {
+        String bearerToken = "Bearer Token";
+        String userId = UUID.randomUUID().toString();
 
-        UserResponseDto result = userService.login(token);
+        when(tokenValidationService.getUserId(bearerToken)).thenReturn(userId);
+        when(userRepository.findById(UUID.fromString(userId))).thenReturn(Optional.of(user));
 
+        UserResponseDto result = userService.login(bearerToken);
+
+        assertNotNull(result);
         assertEquals(user.getEmail(), result.getEmail());
     }
 
     @Test
-    void getUser_UserNotFound_ThrowsException() {
-        String token = "Bearer Token";
-        when(tokenValidationService.clearToken(token)).thenReturn("Token");
-        when(userRepository.findByToken("Token")).thenReturn(Optional.empty());
+    void login_UserNotFound_ThrowsUserNotFoundException() {
+        String bearerToken = "Bearer Token";
+        String userId = UUID.randomUUID().toString();
 
-        assertThrows(UserNotFoundException.class, () -> userService.login(token));
+        when(tokenValidationService.getUserId(bearerToken)).thenReturn(userId);
+        when(userRepository.findById(UUID.fromString(userId))).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.login(bearerToken));
     }
 }

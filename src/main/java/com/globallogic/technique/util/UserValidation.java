@@ -46,22 +46,22 @@ public class UserValidation {
         return uppercaseCount == 1 && digitCount == 2;
     }
 
-    public static UserSigUpResponseDto convertToSignUpResponseDTO(User user) {
+    public static UserSigUpResponseDto convertToSignUpResponseDTO(User user, String token) {
         return UserSigUpResponseDto.builder()
                 .id(user.getId())
                 .created(user.getCreated())
                 .lastLogin(user.getLastLogin())
-                .token(user.getToken())
+                .token(token)
                 .isActive(user.isActive())
                 .build();
     }
 
-    public static UserResponseDto convertToLoginResponseDTO(User user) {
+    public static UserResponseDto convertToLoginResponseDTO(User user, String token) {
         return UserResponseDto.builder()
                 .id(user.getId())
                 .created(user.getCreated())
                 .lastLogin(user.getLastLogin())
-                .token(user.getToken())
+                .token(token)
                 .isActive(user.isActive())
                 .name(user.getName())
                 .email(user.getEmail())

@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static com.globallogic.technique.util.UserValidation.convertToLoginResponseDTO;
 import static com.globallogic.technique.util.UserValidation.convertToSignUpResponseDTO;
@@ -40,26 +41,29 @@ public class UserService {
 
     public UserSigUpResponseDto signUp(UserDTO userRequest) {
         User user = userMapper.toEntity(userRequest);
+
         validateUserData(user);
         user.setPassword(hashPassword(user.getPassword()));
         setUserDefaults(user);
-        String token = generateUserToken(user);
-        user.setToken(token);
+
         userRepository.save(user);
-        return convertToSignUpResponseDTO(user);
+
+        String token = generateUserToken(user);
+        return convertToSignUpResponseDTO(user, token);
     }
 
     public UserResponseDto login(String token) {
-        String searchToken = tokenValidationService.clearToken(token);
-        User user = userRepository.findByToken(searchToken)
+        String userId = tokenValidationService.getUserId(token);
+
+        User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        String newToken = generateUserToken(user);
-        user.setToken(newToken);
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
-        return convertToLoginResponseDTO(user);
+        String newToken = generateUserToken(user);
+
+        return convertToLoginResponseDTO(user, newToken);
     }
 
     private void validateUserData(User user) {

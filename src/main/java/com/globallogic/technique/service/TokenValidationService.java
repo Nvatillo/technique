@@ -28,7 +28,7 @@ public class TokenValidationService {
 
     public String generateJwtToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getEmail())
+                .setSubject(user.getId().toString())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTimeMs))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -43,25 +43,27 @@ public class TokenValidationService {
                     .parseClaimsJws(token);
             return true;
         } catch (JwtException e) {
-            log.error("Token inválido o expirado: " + e.getMessage());
+            log.error("Invalid or expired token: " + e.getMessage());
             return false;
         }
     }
+    
 
-    public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
-    }
-
-    public String clearToken(String token) {
-        if (token != null && token.startsWith("Bearer ")) {
-            return token.substring(7);
+    public String getUserId(String token) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Token inválido o nulo");
         }
-        return null;
+
+        String userToken = token.substring(7); // Elimina "Bearer "
+
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(userToken)
+                    .getBody()
+                    .getSubject();
+        } catch (JwtException e) {
+            throw new IllegalArgumentException("Token inválido", e);
+        }
     }
 }

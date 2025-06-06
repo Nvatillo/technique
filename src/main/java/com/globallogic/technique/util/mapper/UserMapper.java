@@ -9,7 +9,6 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "token", ignore = true)
     @Mapping(target = "lastLogin", ignore = true)
     @Mapping(target = "created", ignore = true)
     @Mapping(target = "isActive", ignore = true)

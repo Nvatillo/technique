@@ -34,7 +34,6 @@ public class User {
     private String email;
     private String password;
     private boolean isActive;
-    private String token;
     private LocalDateTime lastLogin;
     private LocalDateTime created;
 
