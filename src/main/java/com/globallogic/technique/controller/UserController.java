@@ -1,6 +1,7 @@
 package com.globallogic.technique.controller;
 
 import com.globallogic.technique.dto.request.UserDTO;
+import com.globallogic.technique.dto.response.UserSigUpResponseDto;
 import com.globallogic.technique.dto.response.UserResponseDto;
 import com.globallogic.technique.service.TokenValidationService;
 import com.globallogic.technique.service.UserService;
@@ -22,12 +23,12 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/sign-up")
-    public UserResponseDto signUp(@Valid @RequestBody UserDTO userRequest) {
+    public UserSigUpResponseDto signUp(@Valid @RequestBody UserDTO userRequest) {
         return userService.signUp(userRequest);
     }
 
     @GetMapping("/login/{id}")
     public UserResponseDto getUser(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
-        return userService.getUser(id);
+        return userService.login(id);
     }
 }

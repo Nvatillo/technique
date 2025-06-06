@@ -5,6 +5,7 @@ import com.globallogic.technique.dto.request.PhoneDto;
 import com.globallogic.technique.dto.request.UserDTO;
 import com.globallogic.technique.dto.response.PhoneResponseDto;
 import com.globallogic.technique.dto.response.UserResponseDto;
+import com.globallogic.technique.dto.response.UserSigUpResponseDto;
 import com.globallogic.technique.service.TokenValidationService;
 import com.globallogic.technique.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,7 @@ class UserControllerTest {
     private ObjectMapper objectMapper;
 
     private UserDTO userDTO;
+    private UserSigUpResponseDto userSigUpResponseDto;
     private UserResponseDto userResponseDto;
     private UUID userId;
 
@@ -65,27 +67,34 @@ class UserControllerTest {
                 .phones(Collections.singletonList(new PhoneDto(123456789, 1, "+54")))
                 .build();
 
-        userResponseDto = UserResponseDto.builder()
+        userSigUpResponseDto = UserSigUpResponseDto.builder()
                 .id(userId)
-                .email(userDTO.getEmail())
-                .name(userDTO.getName())
                 .created(LocalDateTime.now())
                 .lastLogin(LocalDateTime.now())
                 .token("mocktoken")
+                .isActive(true)
+                .build();
+
+        userResponseDto = userResponseDto.builder()
+                .id(userId)
+                .created(LocalDateTime.now())
+                .lastLogin(LocalDateTime.now())
+                .token("mocktoken")
+                .email("julio@testssw.cl")
+                .password("mockPassword")
+                .isActive(true)
                 .phones(List.of(phoneResponseDto))
                 .build();
     }
 
     @Test
     void testSignUp() throws Exception {
-        when(userService.signUp(any(UserDTO.class))).thenReturn(userResponseDto);
+        when(userService.signUp(any(UserDTO.class))).thenReturn(userSigUpResponseDto);
 
         mockMvc.perform(post("/users/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(userDTO.getEmail()))
-                .andExpect(jsonPath("$.name").value(userDTO.getName()))
                 .andExpect(jsonPath("$.token").value("mocktoken"));
     }
 
@@ -94,14 +103,12 @@ class UserControllerTest {
         String token = "Bearer validtoken";
 
         when(tokenValidationService.validateJwtToken("validtoken")).thenReturn(true);
-        when(userService.getUser(userId)).thenReturn(userResponseDto);
+        when(userService.login(userId)).thenReturn(userResponseDto);
 
         mockMvc.perform(get("/users/login/{id}", userId)
                         .header("Authorization", token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userId.toString()))
-                .andExpect(jsonPath("$.email").value(userDTO.getEmail()))
-                .andExpect(jsonPath("$.name").value(userDTO.getName()));
+                .andExpect(jsonPath("$.id").value(userId.toString()));
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.globallogic.technique.service;
 
 import com.globallogic.technique.dto.request.UserDTO;
 import com.globallogic.technique.dto.response.UserResponseDto;
+import com.globallogic.technique.dto.response.UserSigUpResponseDto;
 import com.globallogic.technique.exception.user.InvalidEmailFormatException;
 import com.globallogic.technique.exception.user.InvalidPasswordFormatException;
 import com.globallogic.technique.exception.user.UserAlreadyExistsException;
@@ -62,6 +63,8 @@ public class UserServiceTest {
                 .email("test@example.com")
                 .password("Password12")
                 .name("Test User").build();
+
+
     }
 
     @Test
@@ -69,16 +72,14 @@ public class UserServiceTest {
         // Arrange
         when(userMapper.toEntity(userDTO)).thenReturn(user);
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("Password12")).thenReturn("hashedPassword");
         when(tokenValidationService.generateJwtToken(user)).thenReturn("mockToken");
 
         // Act
-        UserResponseDto result = userService.signUp(userDTO);
+        UserSigUpResponseDto result = userService.signUp(userDTO);
 
         // Assert
-        assertEquals("test@example.com", result.getEmail());
-        assertEquals("Test User", result.getName());
         assertEquals("mockToken", result.getToken());
+        assertEquals(true, result.getIsActive());
         verify(userRepository).save(any(User.class));
     }
 
@@ -115,7 +116,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserResponseDto result = userService.getUser(userId);
+        UserResponseDto result = userService.login(userId);
 
         assertEquals(user.getEmail(), result.getEmail());
     }
@@ -125,6 +126,6 @@ public class UserServiceTest {
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> userService.getUser(userId));
+        assertThrows(UserNotFoundException.class, () -> userService.login(userId));
     }
 }

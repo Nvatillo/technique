@@ -63,8 +63,8 @@ class UserExceptionHandlingTest {
         mockMvc.perform(post("/users/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userDTO)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error[0].codigo").value(400))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error[0].codigo").value(409))
                 .andExpect(jsonPath("$.error[0].detail").value("User already exist"));
     }
 
@@ -97,7 +97,7 @@ class UserExceptionHandlingTest {
     @Test
     void testUserNotFoundException() throws Exception {
         UUID fakeId = UUID.randomUUID();
-        Mockito.when(userService.getUser(fakeId))
+        Mockito.when(userService.login(fakeId))
                 .thenThrow(new UserNotFoundException("User not found"));
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/users/login/" + fakeId)

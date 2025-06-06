@@ -2,6 +2,7 @@ package com.globallogic.technique.util;
 
 
 import com.globallogic.technique.dto.response.PhoneResponseDto;
+import com.globallogic.technique.dto.response.UserSigUpResponseDto;
 import com.globallogic.technique.dto.response.UserResponseDto;
 import com.globallogic.technique.model.Phone;
 import com.globallogic.technique.model.User;
@@ -45,7 +46,17 @@ public class UserValidation {
         return uppercaseCount == 1 && digitCount == 2;
     }
 
-    public static UserResponseDto convertToUserResponseDTO(User user) {
+    public static UserSigUpResponseDto convertToSignUpResponseDTO(User user) {
+        return UserSigUpResponseDto.builder()
+                .id(user.getId())
+                .created(user.getCreated())
+                .lastLogin(user.getLastLogin())
+                .token(user.getToken())
+                .isActive(user.isActive())
+                .build();
+    }
+
+    public static UserResponseDto convertToLoginResponseDTO(User user) {
         return UserResponseDto.builder()
                 .id(user.getId())
                 .created(user.getCreated())

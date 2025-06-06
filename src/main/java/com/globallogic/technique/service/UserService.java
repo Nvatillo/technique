@@ -2,6 +2,7 @@ package com.globallogic.technique.service;
 
 
 import com.globallogic.technique.dto.request.UserDTO;
+import com.globallogic.technique.dto.response.UserSigUpResponseDto;
 import com.globallogic.technique.dto.response.UserResponseDto;
 import com.globallogic.technique.exception.user.InvalidEmailFormatException;
 import com.globallogic.technique.exception.user.InvalidPasswordFormatException;
@@ -35,7 +36,7 @@ public class UserService {
     @Autowired
     private TokenValidationService tokenValidationService;
 
-    public UserResponseDto signUp(UserDTO userRequest) {
+    public UserSigUpResponseDto signUp(UserDTO userRequest) {
         User user = userMapper.toEntity(userRequest);
         validateUserData(user);
         user.setPassword(hashPassword(user.getPassword()));
@@ -43,13 +44,19 @@ public class UserService {
         String token = generateUserToken(user);
         user.setToken(token);
         userRepository.save(user);
-        return convertToUserResponseDTO(user);
+        return convertToSignUpResponseDTO(user);
     }
 
-    public UserResponseDto getUser(UUID id) {
+    public UserResponseDto login(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        return convertToUserResponseDTO(user);
+
+        String newToken = generateUserToken(user);
+        user.setToken(newToken);
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
+
+        return convertToLoginResponseDTO(user);
     }
 
     private void validateUserData(User user) {
