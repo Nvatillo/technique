@@ -26,7 +26,7 @@ public class ManagementException {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .orElse("Validación inválida");
+                .orElse("Invalid validation");
 
         return buildErrorResponse(HttpStatus.BAD_REQUEST, message);
     }
@@ -53,13 +53,13 @@ public class ManagementException {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> exceptionGeneric(Exception ex) {
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
     }
 
     private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String message) {
         Map<String, Object> errorDetail = new LinkedHashMap<>();
         errorDetail.put("timestamp", Instant.now().toString());
-        errorDetail.put("codigo", status.value());
+        errorDetail.put("code", status.value());
         errorDetail.put("detail", message);
 
         Map<String, Object> error = new LinkedHashMap<>();

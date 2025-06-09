@@ -27,17 +27,20 @@ import static com.globallogic.technique.util.UserValidation.isValidPassword;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final TokenValidationService tokenValidationService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TokenValidationService tokenValidationService;
+    public UserService(UserRepository userRepository,
+                       UserMapper userMapper,
+                       TokenValidationService tokenValidationService,
+                       PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+        this.tokenValidationService = tokenValidationService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public UserSigUpResponseDto signUp(UserDTO userRequest) {
         User user = userMapper.toEntity(userRequest);

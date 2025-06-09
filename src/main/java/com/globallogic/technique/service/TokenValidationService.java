@@ -1,7 +1,6 @@
 package com.globallogic.technique.service;
 
 import com.globallogic.technique.model.User;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -51,10 +50,10 @@ public class TokenValidationService {
 
     public String getUserId(String token) {
         if (token == null || !token.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Token inválido o nulo");
+            throw new IllegalArgumentException("Invalid or null token");
         }
 
-        String userToken = token.substring(7); // Elimina "Bearer "
+        String userToken = token.substring(7);
 
         try {
             return Jwts.parser()
@@ -63,7 +62,7 @@ public class TokenValidationService {
                     .getBody()
                     .getSubject();
         } catch (JwtException e) {
-            throw new IllegalArgumentException("Token inválido", e);
+            throw new IllegalArgumentException("Invalid token", e);
         }
     }
 }
